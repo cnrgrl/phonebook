@@ -2,7 +2,20 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: |
   
 Parameters:
-  
+  MyVPC:
+    Description: Choose your VPC
+    Type: AWS::EC2::VPC::Id
+
+  MyKeyPair:
+    Description: Choose your KeyPair
+    Type: AWS::EC2::KeyPair::KeyName
+
+  Subnets:
+    Description: 
+    Type: AWS::EC2::Subnet::Id
+
+
 Resources:
+
   
 Outputs:
