@@ -67,7 +67,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
       DefaultActions: # Required
-        - TargetGroupArn: XXXXXXXXXXXXXX
+        - TargetGroupArn: !Ref TG
           Type: forward
       LoadBalancerArn: !Ref ALB # Required
       Port: 80
@@ -83,4 +83,39 @@ Resources:
       TargetType: instance
       UnhealthyThresholdCount: 3
       VpcId: !Ref MyVPC
+
+  LT:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        ImageId: ammi-07caf09b362be10b8
+        InstanceType: t2.micro
+        KeyName: MyKeyPair
+        SecurityGroupIds:
+          - !GetAtt WebServerSecurityGroup.GroupId
+        TagSpecifications:
+          - ResourceType: instance
+            Tags:
+              - Key: Name
+                Value: !Sub Web Server of ${AWS::StackName}
+        UserData:
+          Fn::Base64:
+            !Sub
+              - |
+                #! /bin/bash -x
+                dnf update -y
+                dnf install python3 -y
+                dnf install python-pip -y
+                pip3 install Flask==2.3.3
+                pip3 install Flask-MySql
+                pip3 install boto3
+                dnf install git -y
+                echo "${MyDBURI}" > /home/ec2-user/dbserver.endpoint
+                cd /home/ec2-user
+                TOKEN="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"
+                git clone https://$TOKEN@github.com/cnrgrl/phonebook.git
+                python3 /home/ec2-user/phonebook/phonebook-app.py
+              - MyDBURI: !GetAtt DBInstance.Endpoint.Address
+     
+
 Outputs:
