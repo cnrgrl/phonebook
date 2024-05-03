@@ -50,5 +50,37 @@ Resources:
         - EC2SecurityGroupId: !GetAtt WebServerSecurityGroup.GroupId
       GroupDescription: Allow connection only from ec2 # Required
 
+  ALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      IpAddressType: Ipv4
+      Scheme: internet-facing
+      SecurityGroups: 
+        SecurityGroups
+      SubnetMappings: 
+        - !GetAtt ALBSecurityGroup.GroupId
+      Subnets: 
+        - !Ref Subnets
+      Type: application
 
+  ALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions: # Required
+        - TargetGroupArn: XXXXXXXXXXXXXX
+          Type: forward
+      LoadBalancerArn: !Ref ALB # Required
+      Port: 80
+      Protocol: HTTP
+      
+  TG:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthyThresholdCount: 2
+      Port: 80
+      Protocol: HTTP
+      ProtocolVersion: HTTP1
+      TargetType: instance
+      UnhealthyThresholdCount: 3
+      VpcId: !Ref MyVPC
 Outputs:
